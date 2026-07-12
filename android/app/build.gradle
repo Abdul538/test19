@@ -1,0 +1,77 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader("UTF-8") { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
+if (flutterVersionCode == null) {
+    flutterVersionCode = "1"
+}
+
+def flutterVersionName = localProperties.getProperty("flutter.versionName")
+if (flutterVersionName == null) {
+    flutterVersionName = "1.0.0"
+}
+
+android {
+    namespace = "id.myapp.progresshub"
+    // 36 = Android 16 ("Baklava") — versi resmi minimum yang didukung Google
+    // untuk fitur/API terbaru. AGP & Gradle di atas sudah dinaikkan supaya
+    // kompatibel meng-compile terhadap level ini (lihat settings.gradle &
+    // gradle-wrapper.properties).
+    compileSdk = 36
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main.java.srcDirs += "src/main/kotlin"
+    }
+
+    defaultConfig {
+        applicationId "id.myapp.progresshub"
+        // 26 = Android 8.0 Oreo — batas bawah yang diminta. Semua API yang
+        // dipakai di kode (lib/, MainActivity.kt) sudah kompatibel jauh di
+        // bawah ini, jadi angka ini murni deklarasi rentang dukungan resmi,
+        // bukan pembatas teknis.
+        minSdk 26
+        // 36 = Android 16, batas atas yang diminta. targetSdk (bukan cuma
+        // compileSdk) yang menentukan perilaku runtime seperti edge-to-edge
+        // wajib & predictive back gesture — lihat enableOnBackInvokedCallback
+        // di AndroidManifest.xml.
+        targetSdk 36
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+    }
+
+    buildTypes {
+        release {
+            // Ditandatangani dengan debug key secara default supaya bisa langsung
+            // di-build tanpa setup keystore. Untuk rilis ke Play Store, ganti
+            // dengan signing config sendiri.
+            signingConfig signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+}
+
+flutter {
+    source = "../.."
+}

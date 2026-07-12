@@ -1,0 +1,6 @@
+# Salin file ini jadi "local.properties" (tanpa .example) kalau build lokal.
+# GitHub Actions workflow di repo ini SUDAH otomatis generate local.properties
+# sendiri (lihat .github/workflows/build-apk.yml), jadi untuk build via GitHub
+# Actions kamu TIDAK perlu file ini.
+sdk.dir=/path/to/Android/sdk
+flutter.sdk=/path/to/flutter

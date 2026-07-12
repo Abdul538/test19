@@ -1,0 +1,48 @@
+name: progress_hub
+description: "Progress Sepeda Hub - 110kg ke 80kg tracker"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  # Flutter (bukan cuma Dart) perlu versi ini ke atas karena dua alasan:
+  # 1) engine native (.so) yang dibundel perlu 16 KB page-size aligned —
+  #    wajib buat app yang target Android 15+/16 di Play Store.
+  # 2) BackdropGroup / BackdropFilter.grouped (dipakai di glass_card.dart
+  #    untuk mencegah blur "flicker" saat panel di-scroll) baru tersedia
+  #    mulai Flutter 3.35.
+  flutter: '>=3.35.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  google_fonts: ^6.2.1
+  flutter_animate: ^4.5.0
+  shared_preferences: ^2.2.3
+  fl_chart: ^0.68.0
+  share_plus: ^9.0.0
+  intl: ^0.19.0
+  cupertino_icons: ^1.0.6
+  phosphoricons_flutter: ^1.0.0
+  # Untuk parallax partikel berdasarkan giroskop & akselerometer di
+  # particle_background.dart. Butuh AGP >=8.12.1 & Gradle >=8.13 — sudah
+  # dipenuhi oleh konfigurasi android/ saat ini.
+  sensors_plus: ^7.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/icon.png
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon.png"
+  min_sdk_android: 26

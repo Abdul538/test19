@@ -1,0 +1,67 @@
+name: Build APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      # Repo ini sengaja TIDAK menyertakan android/gradlew, gradlew.bat,
+      # atau gradle-wrapper.jar (banyak proyek menghindari commit file .jar
+      # biner "tidak terverifikasi" ke git atas dasar keamanan). Makanya
+      # sebelum build, wrapper-nya dibuat FRESH di sini lewat Gradle asli.
+      #
+      # PENTING: wrapper ini di-generate di folder KOSONG terpisah (bukan
+      # langsung di dalam android/), supaya perintah `gradle wrapper` tidak
+      # ikut mengevaluasi android/settings.gradle milik proyek kita —
+      # settings.gradle itu butuh android/local.properties (berisi path SDK
+      # Flutter), dan file itu sendiri baru dibuat otomatis oleh Flutter
+      # nanti di step "Build APK". Kalau wrapper di-generate langsung di
+      # android/, build gagal duluan karena local.properties belum ada.
+      # Dengan cara ini, hanya 3 file hasil generate (gradlew, gradlew.bat,
+      # gradle-wrapper.jar) yang disalin masuk — gradle-wrapper.properties
+      # milik proyek (yang sudah menentukan versi Gradle 8.13) tetap dipakai
+      # apa adanya.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Generate Gradle wrapper
+        run: |
+          mkdir -p /tmp/gradle-wrapper-gen
+          cd /tmp/gradle-wrapper-gen
+          touch settings.gradle
+          gradle wrapper --gradle-version 8.13
+          cp gradlew "$GITHUB_WORKSPACE/android/gradlew"
+          cp gradlew.bat "$GITHUB_WORKSPACE/android/gradlew.bat"
+          mkdir -p "$GITHUB_WORKSPACE/android/gradle/wrapper"
+          cp gradle/wrapper/gradle-wrapper.jar "$GITHUB_WORKSPACE/android/gradle/wrapper/gradle-wrapper.jar"
+          chmod +x "$GITHUB_WORKSPACE/android/gradlew"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK (release)
+        run: flutter build apk --release
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
